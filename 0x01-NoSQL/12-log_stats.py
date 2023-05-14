@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
-""" Log stats """
+
 from pymongo import MongoClient
 
+# Connect to MongoDB
+client = MongoClient('mongodb://localhost:27017/')
+db = client.logs
+collection = db.nginx
 
-if __name__ == "__main__":
-    client = MongoClient('mongodb://127.0.0.1:27017')
-    db_nginx = client.logs.nginx
-    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+# Count documents in collection
+count = collection.count_documents({})
 
-    count_logs = db_nginx.count_documents({})
-    print(f'{count_logs} logs')
+# Print number of logs
+print(f"{count} logs")
 
-    print('Methods:')
-    for method in methods:
-        count_method = db_nginx.count_documents({'method': method})
-        print(f'\tmethod {method}: {count_method}')
+# Count logs by HTTP method
+methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+for method in methods:
+    method_count = collection.count_documents({"method": method})
+    print(f"    method {method}: {method_count}")
 
-    check = db_nginx.count_documents(
-        {"method": "GET", "path": "/status"}
-    )
-
-    print(f'{check} status check')
+# Count logs with method=GET and path=/status
+status_count = collection.count_documents({"method": "GET", "path": "/status"})
+print(f"{status_count} status check")
